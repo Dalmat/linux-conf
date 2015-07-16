@@ -1,0 +1,14 @@
+setopt prompt_subst
+
+autoload colors
+colors
+
+if  [ "$USER" = "root" ]; then
+COLOR_USER=%{$fg[yellow]%};
+else 
+COLOR_USER=%{$fg[blue]%};
+fi
+
+
+
+export PS1="[$COLOR_USER%n%{$fg[default]%}@%{$fg[red]%}%m%{$fg[default]%}] %{$fg[white]%}%~%{$fg[default]%} : "

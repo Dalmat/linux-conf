@@ -1,0 +1,61 @@
+setopt hist_verify             # completion historique (!) intelligente
+
+autoload -U compinit
+compinit
+export LS_COLORS="no=00:fi=00:di=01;34:ln=01;36:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:su=37;41:sg=30;43:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arj=01;31:*.taz=01;31:*.lzh=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.gz=01;31:*.bz2=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.avi=01;35:*.fli=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.flac=01;35:*.mp3=01;35:*.mpc=01;35:*.ogg=01;35:*.wav=01;35:"
+
+
+zmodload zsh/complist
+
+setopt auto_remove_slash                        # Enleve les / inutiles en completion
+
+#pour remplir meme si on est en milieu de mot
+bindkey '^i' expand-or-complete-prefix
+
+#S'en fout des majuscule
+zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}'
+
+### If you want zsh's completion to pick up new commands in $path automatically
+### comment out the next line and un-comment the following 5 lines
+zstyle ':completion:::::' completer _complete _approximate
+#_force_rehash() {
+#  (( CURRENT == 1 )) && rehash
+#  return 1	# Because we didn't really complete anything
+#}
+#zstyle ':completion:::::' completer _force_rehash _complete _approximate
+zstyle -e ':completion:*:approximate:*' max-errors 'reply=( $(( ($#PREFIX + $#SUFFIX) / 3 )) )'
+zstyle ':completion:*:descriptions' format "- %d -"
+zstyle ':completion:*:corrections' format "- %d - (errors %e})"
+zstyle ':completion:*:default' list-prompt '%S%M matches%s'
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*:manuals' separate-sections true
+zstyle ':completion:*' menu select
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' verbose yes
+
+#en cas de completion pas possible
+zstyle ':completion:*:warnings' format 'Ne trouve pas de: %d'
+#nombre d'erreur maximum
+zstyle ':completion:*' max-errors 3 numeric
+
+#pour mettre en cache la completion (pour apt par exemple)
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path ~/.zsh/cache
+
+#pour la completion des id
+zstyle ':completion:*:*:*:*:processes' menu yes select
+zstyle ':completion:*:*:*:*:processes' force-list always
+
+zstyle ':completion:*' use-compctl false
+
+zstyle ':completion:all-matches::::' completer _all_matches _complete
+zstyle ':completion:all-matches:*' old-matches true
+zstyle ':completion:all-matches:*' insert true
+zstyle ':completion:match-word::::' completer _all_matches _match _ignored
+zstyle ':completion:match-word:*' insert-unambiguous true
+zstyle ':completion:match-word:*' match-original both
+zle -C all-matches complete-word _generic
+zle -C match-word complete-word _generic
+bindkey '^Xx' all-matches
+bindkey '\e*' match-word
+bindkey '^Xl' list-choices

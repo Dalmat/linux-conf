@@ -1,0 +1,26 @@
+export LANGUAGE="fr_FR.UTF-8"
+export LC_ALL="fr_FR.UTF-8"
+export LC_MESSAGE="fr_FR.UTF-8"
+export LANG="fr_FR.UTF-8"
+
+umask 002
+
+unsetopt clobber                                # >| doit etre utilise pour pouvoir ecraser un fichier existant
+setopt print_exit_value                         # Affiche le code de sortie si diff<E9>rent de '0'
+unsetopt ignore_eof                             # Ctrl+D est <E9>quivalent <E0>
+unsetopt rm_star_silent                         # Demande confirmation pour 'rm *'
+
+autoload -U zmv
+
+#correction orthographique des commandes
+setopt correct
+setopt correct_all
+setopt glob_complete                            # Completion avec RegEx
+setopt extendedglob
+
+export LD_LIBRARY_PATH="/usr/local/lib"
+export CLASSPATH=$CLASSPATH:/home/damien/aspectj1.2/lib/aspectjrt.jar
+export PATH=$PATH:/home/damien/aspectj1.2/bin
+export ANT_HOME=/usr/share/ant
+export ASPECTJ_HOME=/home/damien/aspectj1.2
+
