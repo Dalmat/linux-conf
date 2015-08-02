@@ -4,8 +4,9 @@ set -euo pipefail
 bitrate=1024
 crf=25
 preset=slow
+startt=""
 stopt=""
-rotateff=""
+rotate=""
 deinterlace=""
 directory=""
 geometry=""
@@ -13,33 +14,45 @@ acodec="opus"
 vcodec="x264"
 options=""
 
-while getopts "nq:cts:d:ig:a:v:" opt; do
+
+function usage
+{
+cat << EOF
+$0 [options] <file(s) to encode>
+Options:
+	-h  Display the usage
+	-q <video quality> (default $crf)>
+	-c : Rotate the video 90° clockwise
+	-p : Rotate the video 90° anti-clockwise (positive sense)
+	-s <start time> : Start the encoded video at the given time (format for 5 minutes is 300, or 05:00)
+	-e <end time> : Stop the video at the given time (format for 5 minutes is 300, or 05:00)
+	-d <target directory> : Destination folder for the generated files
+	-i : Deinterlace the video
+	-g <XxY> : Resize the video (e.g 800x600)
+	-a <audio codec> : Specify the audio codec (e.g : opus, vorbis, aac, copy)
+	-v <video codec> : Specify the video codec (e.g : x264, x265, copy)
+EOF
+}
+
+while getopts "hnq:cts:e:d:ig:a:v:" opt; do
 	case "$opt" in 
 		q) crf="$OPTARG" ;;
 		c) # --rotate clockwise
-		   rotateff=-vf\ transpose=1
-		   rotate=--transform-type=90 
-		   rotatefilter=vfilter=\"transform\",
+		   rotate=-vf\ transpose=1
 	   	   ;;
-		t) # rotate anti clockwise
-		   rotateff=-vf\ transpose=2
-		   rotate=--transform-type=270
-		   rotatefilter=vfilter=\"transform\",
+		p) # rotate anti clockwise
+		   rotate=-vf\ transpose=2
 		   ;;
-
-		s)
-		   stopt=-to\ $OPTARG
-		   stopvlc="--stop-time=$OPTARG"
-		   ;;
-
+		s) startt=-ss\ $OPTARG ;;
+		e) stopt=-to\ $OPTARG ;;
 		d) directory="$OPTARG" ;;
 		i) deinterlace=-vf\ yadif ;;
 		g) geometry=-vf\ scale=$OPTARG ;;
 		a) acodec=$OPTARG ;;
 		v) vcodec=$OPTARG ;;
+		h) usage ;;
 	esac
 done
-
 
 
 shift $(($OPTIND - 1))
@@ -83,7 +96,6 @@ else
 	newfile=$directory/${newfile%.*}_rs.$container
 fi
 
-#vlc -I dummy -vv $file $rotate --sout "#transcode{$rotatefilter vcodec=h264,vb=$bitrate,acodec=mp4a,ab=96}:standard{mux=mp4,dst=\"/tmp/$newfile\",access=file}" $stop vlc://quit
 #vlc -I dummy $file $rotate --sout "#transcode{$rotatefilter vcodec=h264,fps=29.97, venc=x264{crf=$crf,preset=$preset,tune=film},acodec=mp4a,ab=96}:standard{mux=mp4,dst=\"$newfile\",access=file}" $stopvlc vlc://quit
 
 # http://linuxfr.org/users/elyotna/journaux/hevc-vp9-x265-vs-libvpx
@@ -91,7 +103,7 @@ fi
 
 STARTTIME=$(date +%s)
 set -x
-ffmpeg -y -i "$file" $geometry $stopt $deinterlace $rotateff $audio $video -preset $preset $options "${newfile}"
+ffmpeg -y -i "$file" $geometry $startt $stopt $deinterlace $rotate $audio $video -preset $preset $options "${newfile}"
 set +x
 touch -r "$file" "${newfile}"
 ELAPSEDTIMED=$(($(date +%s) - STARTTIME))
