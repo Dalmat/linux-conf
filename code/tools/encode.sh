@@ -2,8 +2,9 @@
 set -euo pipefail
 
 bitrate=1024
-crf=25
-preset=slow
+defaultcrf=24
+crf=
+preset="-preset slow"
 startt=""
 stopt=""
 rotate=""
@@ -11,8 +12,11 @@ deinterlace=""
 directory=""
 geometry=""
 acodec="opus"
-vcodec="x264"
+aquality="low"
+vcodec="vp9"
 options=""
+ext="_rs"
+
 
 
 function usage
@@ -30,12 +34,14 @@ Options:
 	-i : Deinterlace the video
 	-g <XxY> : Resize the video (e.g 800x600)
 	-a <audio codec> : Specify the audio codec (e.g : opus, vorbis, aac, copy)
+	-A <audio codec> : Specify the audio quality (e.g low/high) (default: low). Note: the values depend on the codec
 	-v <video codec> : Specify the video codec (e.g : x264, x265, copy)
+	-x <extension> : Add an extension suffix to the output filename (default : $ext if a target directory is not specified)
 EOF
 }
 
-while getopts "hnq:cts:e:d:ig:a:v:" opt; do
-	case "$opt" in 
+while getopts "hnq:cts:e:d:ig:a:A:v:x:" opt; do
+	case "$opt" in
 		q) crf="$OPTARG" ;;
 		c) # --rotate clockwise
 		   rotate=-vf\ transpose=1
@@ -49,33 +55,43 @@ while getopts "hnq:cts:e:d:ig:a:v:" opt; do
 		i) deinterlace=-vf\ yadif ;;
 		g) geometry=-vf\ scale=$OPTARG ;;
 		a) acodec=$OPTARG ;;
+		A) aquality=$OPTARG ;;
 		v) vcodec=$OPTARG ;;
+		x) ext=$OPTARG ;;
 		h) usage ;;
 	esac
 done
 
+[ -z $crf ] && crf=$defaultcrf
 
 shift $(($OPTIND - 1))
 
 if [[ $acodec == "aac" ]]; then
-	audio="-c:a libfdk_aac -b:a 96k"
-	container=mp4
-	options="$options -movflags +faststart"
+        if [[ $aquality == "low" ]]; then
+            aquality=96k
+        elif [[ $aquality == "high" ]]; then
+            aquality=128k
+        fi
+	audio="-c:a libfdk_aac -b:a $aquality"
 elif [[ $acodec == "copy" ]]; then
 	audio="-c:a copy"
-	container=mkv
 elif [[ $acodec == "opus" ]]; then
-	audio="-c:a libopus -b:a 64k"
-	container=mkv
+        if [[ $aquality == "low" ]]; then
+            aquality=80k
+        elif [[ $aquality == "high" ]]; then
+            aquality=128k
+        fi
+	audio="-c:a libopus -b:a $aquality"
 elif [[ $acodec == "vorbis" ]]; then
-	audio="-c:a libvorbis -aq 3"
-	container=mkv	
+        if [[ $aquality == "low" ]]; then
+            aquality=4
+        elif [[ $aquality == "high" ]]; then
+            aquality=3
+        fi
+	audio="-c:a libvorbis -aq $aquality"
 fi
 
-if [[ $container == "mkv" ]]; then
-# 	duration=$(mediainfo --Inform="General;%Duration%" "$file")
-	options="$options -reserve_index_space 2000"
-fi
+
 
 if [[ $vcodec == "copy" ]]; then
 	video="-c:v copy"
@@ -83,6 +99,25 @@ elif [[ $vcodec == "x264" ]]; then
 	video="-c:v libx264 -crf $crf"
 elif [[ $vcodec == "x265" ]]; then
 	video="-c:v libx265 -crf $crf"
+elif [[ $vcodec == "vp9" ]]; then
+	preset=""
+	video="-c:v libvpx-vp9 -g 100 -threads 4 -tile-columns 6 -frame-parallel 0  -speed 2 -b:v 4M -crf $crf"
+#	video="-c:v libvpx-vp9 -threads 4 -tile-columns 6  -b:v 3M -crf $crf"
+fi
+
+if [[ $acodec == "aac" ]]; then
+    container=mp4
+elif [[ $acodec != "aac" ]] && [[ $vcodec == "vp9" ]]; then
+    container=webm
+else
+    container=mkv
+fi
+
+if [[ $container == "mkv" ]]; then
+# 	duration=$(mediainfo --Inform="General;%Duration%" "$file")
+	options="$options -reserve_index_space 2000"
+elif [[ $container == "mp4" ]]; then
+	options="$options -movflags +faststart"
 fi
 
 for file in "$@"; do
@@ -90,24 +125,22 @@ for file in "$@"; do
 echo "Encoding $file"
 
 if [ -z $directory ]; then
-	newfile=${file%.*}_rs.$container
+	newfile=${file%.*}$ext.$container
 else
     newfile=$(basename "$file")
-	newfile=$directory/${newfile%.*}_rs.$container
+	newfile=$directory/${newfile%.*}.$container
 fi
-
-#vlc -I dummy $file $rotate --sout "#transcode{$rotatefilter vcodec=h264,fps=29.97, venc=x264{crf=$crf,preset=$preset,tune=film},acodec=mp4a,ab=96}:standard{mux=mp4,dst=\"$newfile\",access=file}" $stopvlc vlc://quit
 
 # http://linuxfr.org/users/elyotna/journaux/hevc-vp9-x265-vs-libvpx
 # https://sites.google.com/a/webmproject.org/wiki/ffmpeg/vp9-encoding-guide
 
 STARTTIME=$(date +%s)
 set -x
-ffmpeg -y -i "$file" $geometry $startt $stopt $deinterlace $rotate $audio $video -preset $preset $options "${newfile}"
+ffmpeg -y -i "$file" $geometry $startt $stopt $deinterlace $rotate $audio $video $preset $options "${newfile}"
 set +x
 touch -r "$file" "${newfile}"
 ELAPSEDTIMED=$(($(date +%s) - STARTTIME))
 
-echo "${newfile} encoded in $ELAPSEDTIMED s"
+echo -e "${newfile} encoded in \033[01;32m$ELAPSEDTIMED s\033[00m"
 
 done
