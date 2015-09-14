@@ -1,0 +1,22 @@
+[ui]
+username = Dalmat <dalmat@dalmat.net>
+
+[extensions]
+color =
+mq =
+graphlog =
+fetch =
+convert=
+relink =
+eol =
+purge =
+rebase =
+pager =
+
+[auth]
+dalmat.schemes = https
+dalmat.prefix = dalmat.net/hg
+dalmat.username = dalmat
+
+[pager]
+pager = LESS='FRX' less
