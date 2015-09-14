@@ -7,7 +7,7 @@
 HISTCONTROL=ignoredups:ignorespace
 
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-HISTSIZE=1000
+HISTSIZE=2000
 HISTFILESIZE=2000
 
 # append to the history file, don't overwrite it
@@ -26,8 +26,29 @@ shopt -s checkwinsize
 # set a fancy prompt (non-color, unless we know we "want" color)
 case "$TERM" in
     xterm-color) color_prompt=yes;;
-    xterm) color_prompt=yes;;
-esac
+    xterm) color_prompt=yes
+          #PROMPT_COMMAND='printf "\033]0;%s@%s:%s\007" "${USER}" "${HOSTNAME%%.*}" "${PWD/#$HOME/~}"'
+	;;
+    screen*)
+      if [ -e /etc/sysconfig/bash-prompt-screen ]; then
+          PROMPT_COMMAND=/etc/sysconfig/bash-prompt-screen
+      else
+          PROMPT_COMMAND='printf "\033k%s@%s:%s\033\\" "${USER}" "${HOSTNAME%%.*}" "${PWD/#$HOME/~}"'
+      fi
+      ;;
+    *)
+      [ -e /etc/sysconfig/bash-prompt-default ] && PROMPT_COMMAND=/etc/sysconfig/bash-prompt-default
+      ;;
+ esac
+
+  [ "$PS1" = "\\s-\\v\\\$ " ] && PS1="[\u@\h \W]\\$ "
+  # You might want to have e.g. tty in prompt (e.g. more virtual machines)
+  # and console windows
+  # If you want to do so, just add e.g.
+  # if [ "$PS1" ]; then
+  #   PS1="[\u@\h:\l \W]\\$ "
+  # fi
+ 
 
 if [ "$color_prompt" = yes ]; then
     PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
@@ -62,7 +83,7 @@ alias rec='ls -lht | head'
 alias er='vim ~/.bashrc'
 alias re='source ~/.bashrc'
 
-alias nyx-wake='ssh athena sudo nyx-wake'
+alias nyx-wake='wol 00:1F:D0:9A:A2:25'
 
 alias co='hg commit -m'
 alias hlog='hg log -l 4'
@@ -70,7 +91,7 @@ alias hlog='hg log -l 4'
 alias checkcd='find . -type f -exec md5sum {} \; > /dev/null'
 
 
-alias maj='sudo apt-get update && sudo apt-get upgrade'
+alias maj='if [[ -f /usr/bin/apt-get ]]; then sudo apt-get update && sudo apt-get upgrade; else sudo pacman -Syu; fi'
 alias apt='sudo apt-get'
 alias ai='sudo apt-get install'
 alias listpkg='dpkg-query -Wf '"'"'${Installed-Size}\t${Package}\n\'"'"' | sort -n'
@@ -96,6 +117,36 @@ alias taille='find /home -type f -printf "%s\t%p\n" |sort -rn |head -n20 |less'
 alias cdd='/usr/lib/wcd/wcd.exec'
 alias ccd='/usr/lib/wcd/wcd.exec'
 
+alias vi='vim'
+alias view='vim -R'
+alias dssh='ssh -l dalmat'
+alias mssh='ssh -l matthieu.dalstein -A'
+alias er='vi ~/.bashrc'
+alias re='source ~/.bashrc'
+alias df='df -h'
+alias ll='ls -lh'
+alias ls='ls --color=auto'
+alias pk='pkgfile -s'
+alias dal='ssh dalmat@dalmat.net'
+alias wiki='cd /srv/usr/local/share/Wikipad/ && python2 WikidPad.py &'
+alias ent='sudo nsenter -n -t'
+alias mountvbox='mkdir /tmp/vbox && sudo mount -t vboxsf tmp /tmp/vbox'
+
+
+function dl
+{
+	docker logs $2 $(docker ps | grep $1 | awk '{print $1}')
+}
+
+function de
+{
+	docker exec -ti $(docker ps | grep $1 | awk '{print $1}') bash
+}
+
+alias dockerrmi='for image in $(docker images | awk '/mdalstein/ || /root/ {print $3}'); do docker rmi $image; done'
+
+
+
 function cp_progress()
 {
 	SIZE=`du -sb $1 | awk '{print $1}'`
@@ -104,8 +155,29 @@ function cp_progress()
 	( cd $1 ; tar cf - . ) | pv -s $SIZE | ( mkdir $2/$DEST && cd $2/$DEST ; tar xf - )
 }
 
+function p()
+{
+ pacman -$@
+}
 
-export PATH=$PATH:~/code/tools
+function pent()
+{
+ pid=$(pidof $1)
+ 
+ sudo nsenter -n -t $pid
+}
+
+function denter()
+{
+  container=$(docker ps | awk ' {print $1 " " $2 " " $3}' | awk '/etcd/ {print $1}')
+  echo "Entering container $container"
+  docker exec -ti $container /bin/bash
+}
+
+alias chr='mount -t proc proc /srv/proc/ && mount -t sysfs sys /srv/sys && mount -o bind /dev /srv/dev/ && chroot /srv/'
+
+export GOPATH=~/code/go
+export PATH=$PATH:~/code/tools:$GOPATH/bin
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
@@ -117,3 +189,5 @@ fi
 if [ -f ~/.bashrc_local ];then  
 	. ~/.bashrc_local
 fi
+
+# vim:ts=4:sw=4
