@@ -36,7 +36,7 @@ Options:
 	-a <audio codec> : Specify the audio codec (e.g : opus, vorbis, aac, copy)
 	-A <audio codec> : Specify the audio quality (e.g low/high) (default: low). Note: the values depend on the codec
 	-v <video codec> : Specify the video codec (e.g : x264, x265, copy)
-	-x <extension> : Add an extension suffix to the output filename (default : $ext if a target directory is not specified)
+	-x <extension> : Add an extension suffix to the output filename (default : $ext if the output extension is the same as the input file)
 EOF
 }
 
@@ -123,6 +123,11 @@ fi
 for file in "$@"; do
 
 echo "Encoding $file"
+
+# Use extension only if the output filename is the same as the input filename
+if [ "$container" != "${file##*.}" ]; then
+	ext=""
+fi
 
 if [ -z $directory ]; then
 	newfile=${file%.*}$ext.$container
