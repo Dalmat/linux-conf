@@ -89,6 +89,7 @@ alias du='du -h'
 alias df='df -h'
 alias ll='ls -alhF'
 alias rec='ls -lht | head'
+alias grpe='grep'
 
 alias er='vim ~/.bashrc'
 alias re='source ~/.bashrc'
