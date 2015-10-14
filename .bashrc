@@ -170,6 +170,16 @@ function p()
  pacman -$@
 }
 
+function ffconcat()
+{
+	length=$(($#-1))
+	array=${@:1:$length}
+	output=${@: -1}
+	echo "" > /tmp/liste
+	for file in ${array[@]}; do echo "file $file" >> /tmp/liste; done
+	ffmpeg -f concat -i /tmp/liste -c copy $output
+}
+
 function pent()
 {
  pid=$(pidof $1)
