@@ -130,6 +130,7 @@ alias ccd='/usr/lib/wcd/wcd.exec'
 
 alias vi='vim'
 alias view='vim -R'
+alias squash='git rebase -i upstream/master'
 alias dssh='ssh -l dalmat'
 alias mssh='ssh -l matthieu.dalstein -A'
 alias er='vi ~/.bashrc'
