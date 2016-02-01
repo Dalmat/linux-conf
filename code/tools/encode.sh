@@ -2,7 +2,7 @@
 set -euo pipefail
 
 bitrate=1024
-defaultcrf=24
+defaultcrf=23
 crf=
 preset="-preset slow"
 startt=""
@@ -40,7 +40,7 @@ Options:
 EOF
 }
 
-while getopts "hnq:cts:e:d:ig:a:A:v:x:" opt; do
+while getopts "hq:cps:e:d:ig:a:A:v:x:" opt; do
 	case "$opt" in
 		q) crf="$OPTARG" ;;
 		c) # --rotate clockwise

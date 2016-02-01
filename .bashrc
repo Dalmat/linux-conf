@@ -175,11 +175,35 @@ function p()
 function ffconcat()
 {
 	length=$(($#-1))
+	echo $length
 	array=${@:1:$length}
+	#for i in 0 1;  do echo ${array[$i]}; done
 	output=${@: -1}
-	echo "" > /tmp/liste
-	for file in ${array[@]}; do echo "file $file" >> /tmp/liste; done
-	ffmpeg -f concat -i /tmp/liste -c copy $output
+	echo -n "" > liste
+	for file in ${array[@]}; do echo "file $file" >> liste; done
+	ffmpeg -f concat -i liste -c copy "$output"
+	touch -r ${array[0]} "$output"
+	#cat liste
+	rm liste
+}
+
+function shiftTimestamp()
+{
+	delta=$1
+	shift
+	exiftool -P -overwrite_original -AllDates+=$delta -DateTimeDigitized+=$delta -DateTime+=$delta "$@"
+}
+
+function updateDescription()
+{
+	title=$1
+	description=$2
+	exiftool -P *.[jJ][pP][gG] -overwrite_original -if '$Title eq '\'"$title"\' -ImageDescription=$description -Description=$description
+}
+
+function updateTimestamp()
+{
+	exiftool -progress -d '%Y:%m:%d %H:%M:%S' -if '$FileModifyDate ne $DateTimeOriginal' '-FileModifyDate<DateTimeOriginal' $@
 }
 
 function pent()
