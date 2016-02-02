@@ -25,7 +25,7 @@ cat << EOF
 $0 [options] <file(s) to encode>
 Options:
 	-h  Display the usage
-	-q <video quality> (default $crf)>
+	-q <video quality> (default ${defaultcrf})>
 	-c : Rotate the video 90° clockwise
 	-p : Rotate the video 90° anti-clockwise (positive sense)
 	-s <start time> : Start the encoded video at the given time (format for 5 minutes is 300, or 05:00)
@@ -58,7 +58,7 @@ while getopts "hq:cps:e:d:ig:a:A:v:x:" opt; do
 		A) aquality=$OPTARG ;;
 		v) vcodec=$OPTARG ;;
 		x) ext=$OPTARG ;;
-		h) usage ;;
+		h) usage; exit 0 ;;
 	esac
 done
 
