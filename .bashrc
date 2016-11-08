@@ -102,7 +102,7 @@ alias hlog='hg log -l 4'
 alias checkcd='find . -type f -exec md5sum {} \; > /dev/null'
 
 
-alias maj='if [[ -f /usr/bin/apt-get ]]; then sudo apt-get update && sudo apt-get upgrade; else sudo pacman -Syu; fi'
+alias maj='if [[ -f /usr/bin/apt-get ]]; then sudo apt-get update ; sudo apt-get upgrade; else sudo pacman -Syu; fi'
 alias apt='sudo apt-get'
 alias ai='sudo apt-get install'
 alias listpkg='dpkg-query -Wf '"'"'${Installed-Size}\t${Package}\n\'"'"' | sort -n'
@@ -175,14 +175,13 @@ function p()
 function ffconcat()
 {
 	length=$(($#-1))
-	echo $length
-	array=${@:1:$length}
-	#for i in 0 1;  do echo ${array[$i]}; done
 	output=${@: -1}
+	array=("${@:1:$length}")
+	for i in "${array[@]}"; do echo "$i"; done
 	echo -n "" > liste
-	for file in ${array[@]}; do echo "file $file" >> liste; done
-	ffmpeg -f concat -i liste -c copy "$output"
-	touch -r ${array[0]} "$output"
+	for file in "${array[@]}"; do echo file \'$(realpath "$file")\' >> liste; done
+	ffmpeg -safe 0 -f concat -i liste -c copy "$output"
+	touch -r "${array[0]}" "$output"
 	#cat liste
 	rm liste
 }
@@ -204,6 +203,11 @@ function updateDescription()
 function updateTimestamp()
 {
 	exiftool -progress -d '%Y:%m:%d %H:%M:%S' -if '$FileModifyDate ne $DateTimeOriginal' '-FileModifyDate<DateTimeOriginal' $@
+}
+
+function removeTimestamp()
+{
+	exiftool -r -overwrite_original  -allDates=  -if '$DateTimeOriginal eq "2002:01:01 00:00:00"' .
 }
 
 function pent()

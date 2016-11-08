@@ -2,7 +2,7 @@
 set -euo pipefail
 
 bitrate=1024
-defaultcrf=23
+defaultcrf=22
 crf=
 preset="-preset slow"
 startt=""
@@ -81,7 +81,7 @@ elif [[ $acodec == "opus" ]]; then
         elif [[ $aquality == "high" ]]; then
             aquality=128k
         fi
-	audio="-c:a libopus -b:a $aquality"
+	audio="-c:a libopus -b:a $aquality -af aformat=channel_layouts='stereo'"
 elif [[ $acodec == "vorbis" ]]; then
         if [[ $aquality == "low" ]]; then
             aquality=4
