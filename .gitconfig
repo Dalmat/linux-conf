@@ -1,6 +1,7 @@
 [user]
 	name = Matthieu Dalstein
 	email = github@dalmat.net
+	#email = matthieu.dalstein@amadeus.com
 
 [push]
 	default = matching
@@ -28,3 +29,7 @@
 	#show = /usr/share/git/diff-highlight/diff-highlight | less
 [alias]
         ignore = "!gi() { curl -s https://www.gitignore.io/api/$@ ;}; gi"
+[pull]
+	rebase = false
+[core]
+	askpass = /usr/bin/ksshaskpass

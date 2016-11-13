@@ -68,12 +68,15 @@ xterm*|rxvt*)
 esac
 #PS1='\u@\h:\w\$ '
 
+source /usr/share/git/completion/git-prompt.sh
 GIT_PS1_SHOWDIRTYSTATE=1
 GIT_PS1_SHOWSTASHSTATE=1
 GIT_PS1_SHOWUNTRACKEDFILES=1
 GIT_PS1_SHOWUPSTREAM=verbose
+#GIT_PS1_SHOWUPSTREAM="verbose name"
 GIT_PS1_SHOWCOLORHINTS=1
-#PROMPT_COMMAND='__git_ps1 "\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]" "\$(if [[ \$? -eq 0 ]]; then printf \"\[\033[01;30m\]\"; else printf \"\[\033[07;31m\]\"; fi)\\$\[\033[00m\] "'
+PROMPT_COMMAND='__git_ps1 "\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]" "\$(if [[ \$? -eq 0 ]]; then printf \"\[\033[01;30m\]\"; else printf \"\[\033[07;31m\]\"; fi)\\$\[\033[00m\] "'
+#PROMPT_COMMAND='__git_ps1 "{{ virtualenv_ps1 }}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]" "\$(if [[ \$? -eq 0 ]]; then printf \"\[\033[1;30m\]\"; else printf \"\[\033[7;31m\]\"; fi)\\\$\[\033[00m\] "'
 
 # enable color support of ls and also add handy aliases
 eval `dircolors -b`
@@ -131,9 +134,16 @@ alias ccd='/usr/lib/wcd/wcd.exec'
 alias vi='vim'
 alias view='vim -R'
 alias squash='git rebase -i upstream/master'
+alias ff='git pull --ff-only'
+alias fu='git branch -u origin/master'
+alias fr='git pull --rebase'
+alias gitout='git log origin/master..HEAD'
+alias gitin='git log HEAD..origin/master'
+alias amend='git commit --amend --no-edit'
 alias dssh='ssh -l dalmat'
 alias mssh='ssh -l matthieu.dalstein -A'
 alias er='vi ~/.bashrc'
+alias ert='vi ~/.bashrc_local'
 alias re='source ~/.bashrc'
 alias df='df -h'
 alias ll='ls -lh'
