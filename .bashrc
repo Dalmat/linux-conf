@@ -105,8 +105,7 @@ alias hlog='hg log -l 4'
 alias checkcd='find . -type f -exec md5sum {} \; > /dev/null'
 
 
-alias maj='if [[ -f /usr/bin/apt-get ]]; then sudo apt-get update ; sudo apt-get upgrade; else sudo pacman -Syu; fi'
-alias apt='sudo apt-get'
+alias maj='if [[ -f /usr/bin/apt ]]; then sudo apt update ; sudo apt upgrade; else sudo pacman -Syu; fi'
 alias ai='sudo apt-get install'
 alias listpkg='dpkg-query -Wf '"'"'${Installed-Size}\t${Package}\n\'"'"' | sort -n'
 alias ys='yaourt -S --noconfirm'
@@ -212,7 +211,7 @@ function updateDescription()
 
 function updateTimestamp()
 {
-	exiftool -progress -d '%Y:%m:%d %H:%M:%S' -if '$FileModifyDate ne $DateTimeOriginal' '-FileModifyDate<DateTimeOriginal' $@
+	exiftool -progress -d '%Y:%m:%d %H:%M:%S' -if '$FileModifyDate ne $DateTimeOriginal' '-FileModifyDate<DateTimeOriginal' "$@"
 }
 
 function removeTimestamp()
