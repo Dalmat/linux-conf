@@ -56,7 +56,7 @@ if [ "$color_prompt" = yes ]; then
 else
     PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
 fi
-unset color_promptt
+#unset color_promptt
 
 # If this is an xterm set the title to user@host:dir
 case "$TERM" in
@@ -68,7 +68,10 @@ xterm*|rxvt*)
 esac
 #PS1='\u@\h:\w\$ '
 
-source /usr/share/git/completion/git-prompt.sh
+if [ -f /usr/share/git/completion/git-prompt.sh ]; then
+	source /usr/share/git/completion/git-prompt.sh
+fi
+
 GIT_PS1_SHOWDIRTYSTATE=1
 GIT_PS1_SHOWSTASHSTATE=1
 GIT_PS1_SHOWUNTRACKEDFILES=1
