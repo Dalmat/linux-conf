@@ -4,7 +4,7 @@
 	#email = matthieu.dalstein@amadeus.com
 
 [push]
-	default = matching
+	default = current
 
 [diff]
 	tool = kdiff3
@@ -33,3 +33,5 @@
 	rebase = false
 [core]
 	askpass = /usr/bin/ksshaskpass
+[submodule]
+	recurse = true

@@ -49,7 +49,7 @@ case "$TERM" in
   # if [ "$PS1" ]; then
   #   PS1="[\u@\h:\l \W]\\$ "
   # fi
- 
+
 
 if [ "$color_prompt" = yes ]; then
     PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
@@ -70,6 +70,8 @@ esac
 
 if [ -f /usr/share/git/completion/git-prompt.sh ]; then
 	source /usr/share/git/completion/git-prompt.sh
+else
+	source /usr/lib/git-core/git-sh-prompt
 fi
 
 GIT_PS1_SHOWDIRTYSTATE=1
@@ -162,7 +164,7 @@ alias dlaudio='youtube-dl -f 251'
 
 function dlaudio
 {
-	youtube-dl -f 251 "$1" 
+	youtube-dl -f 251 "$1"
 	output_file="test"
 	ffmpeg -i "$output_file" -c:a copy "${output_file/webm/opus}"
 	rm "$output_file"
@@ -237,7 +239,7 @@ function removeTimestamp()
 function pent()
 {
  pid=$(pidof $1)
- 
+
  sudo nsenter -n -t $pid
 }
 
@@ -252,7 +254,8 @@ alias wallpapersave='for size in 1680 1920 2560; do for i in $(find /usr/share/w
 alias chr='mount -t proc proc /srv/proc/ && mount -t sysfs sys /srv/sys && mount -o bind /dev /srv/dev/ && chroot /srv/'
 
 export GOPATH=~/code/go
-export PATH=$PATH:~/code/tools:$GOPATH/bin:/snap/bin
+export PATH=$PATH:~/code/tools:$GOPATH/bin:~/.local/bin:/snap/bin
+export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
@@ -261,7 +264,7 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
     . /etc/bash_completion
 fi
 
-if [ -f ~/.bashrc_local ];then  
+if [ -f ~/.bashrc_local ];then
 	. ~/.bashrc_local
 fi
 
