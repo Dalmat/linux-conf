@@ -38,7 +38,7 @@ Options:
 	-i : Deinterlace the video
 	-g <XxY> : Resize the video (e.g 800x600)
 	-a <audio codec> : Specify the audio codec (e.g : opus, vorbis, aac, copy)
-	-A <audio quality> : Specify the audio quality (e.g low/mid/high) (default: low). Note: the values depend on the codec
+	-A <audio quality> : Specify the audio quality (e.g low/mid/high) (default: mid). Note: the values depend on the codec
 	-v <video codec> : Specify the video codec (e.g : x264, x265, copy, hevc_vaapi, none)
 	-x <extension> : Add an extension suffix to the output filename (default : $ext if the output extension is the same as the input file)
 EOF
@@ -92,9 +92,11 @@ elif [[ $acodec == "opus" ]]; then
 	audio="-c:a libopus -b:a $aquality -af aformat=channel_layouts='stereo'"
 elif [[ $acodec == "vorbis" ]]; then
         if [[ $aquality == "low" ]]; then
+            aquality=3
+        elif [[ $aquality == "mid" ]]; then
             aquality=4
         elif [[ $aquality == "high" ]]; then
-            aquality=3
+            aquality=5
         fi
 	audio="-c:a libvorbis -aq $aquality"
 fi
@@ -147,6 +149,11 @@ done
 for file in "$@"; do
 
 echo "Encoding $file"
+
+# Auto guess container for an audio extraction
+if [[ $vcodec == "none" ]] && [[ $acodec == "copy" ]]; then
+	container=$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "$file")
+fi
 
 # Use extension only if the output filename is the same as the input filename
 if [ "$container" != "${file##*.}" ]; then
