@@ -1,6 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
+# TODO Manage subtitle addition
+# ffmpeg -y -i video.mkv -f srt -i subtitle.srt -map 0:0 -map 0:1 -map 0:2  -map 1:0 -c copy -c:s srt -metadata:s:s:0 title=standard -metadata:s:s:0 language=eng video.mkv
+
 bitrate=1024
 declare -A defaultcrf
 crf=

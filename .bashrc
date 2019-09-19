@@ -113,7 +113,7 @@ alias ai='sudo apt-get install'
 alias listpkg='dpkg-query -Wf '"'"'${Installed-Size}\t${Package}\n\'"'"' | sort -n'
 alias ys='yaourt -S --noconfirm'
 
-alias loc='locate -i'
+alias loc='locate -A -i'
 alias v='vim -R'
 
 alias tv='/usr/bin/vlc http://mafreebox.freebox.fr/freeboxtv/playlist.m3u'
@@ -155,6 +155,8 @@ alias dal='ssh dalmat@dalmat.net'
 alias wiki='cd /srv/usr/local/share/Wikipad/ && python2 WikidPad.py &'
 alias ent='sudo nsenter -n -t'
 alias mountvbox='mkdir /tmp/vbox && sudo mount -t vboxsf tmp /tmp/vbox'
+alias comparedir='rsync --recursive --delete --links --verbose --dry-run'
+alias comparedirchecksum='rsync --recursive --delete --links --checksum --verbose --dry-run'
 
 
 function dl
@@ -236,6 +238,7 @@ function denter()
   docker exec -ti $container /bin/bash
 }
 
+alias wallpapersave='for size in 1680 1920 2560; do for i in $(find /usr/share/wallpapers -name $size*) ; do arr=(${i//\// }); echo  cp -n "$i" /mnt/ftp/Multi/wallpapers/${arr[1]}-${arr[4]}; done; done'
 alias chr='mount -t proc proc /srv/proc/ && mount -t sysfs sys /srv/sys && mount -o bind /dev /srv/dev/ && chroot /srv/'
 
 export GOPATH=~/code/go
