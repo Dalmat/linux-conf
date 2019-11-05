@@ -1,7 +1,7 @@
 [user]
 	name = Matthieu Dalstein
-	email = github@dalmat.net
-	#email = matthieu.dalstein@amadeus.com
+	#email = github@dalmat.net
+	email = matthieu.dalstein@amadeus.com
 
 [push]
 	default = current
