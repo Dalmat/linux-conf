@@ -160,6 +160,7 @@ alias mountvbox='mkdir /tmp/vbox && sudo mount -t vboxsf tmp /tmp/vbox'
 
 alias comparedir='rsync --recursive --delete --links --verbose --dry-run'
 alias comparedirchecksum='rsync --recursive --delete --links --checksum --verbose --dry-run'
+
 alias l='locate'
 alias dlaudio='youtube-dl -f 251'
 
@@ -172,6 +173,13 @@ function dlaudio
 	output_file="test"
 	ffmpeg -i "$output_file" -c:a copy "${output_file/webm/opus}"
 	rm "$output_file"
+}
+
+alias dvgrab-auto='dvgrab --autosplit --timestamp --format raw capture'
+
+function freedl
+{
+	ffmpeg -i "rtsp://mafreebox.freebox.fr/fbxtv_pub/stream?namespace=1&service=$1" -c:v copy -c:a copy /srv/$1-$(date +%F_%T).ts
 }
 
 
