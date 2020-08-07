@@ -115,6 +115,7 @@ else
 	
 	if [[ $vcodec == "x264" ]]; then
 		video="-c:v libx264 -crf $crf"
+		preset="-preset slower"
 	elif [[ $vcodec == "x265" ]]; then
 		video="-c:v libx265 -crf $crf"
 	elif [[ $vcodec == "hevc_vaapi" ]]; then
