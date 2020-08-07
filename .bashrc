@@ -8,8 +8,8 @@ HISTCONTROL=ignoredups:ignorespace
 HISTIGNORE='&:ls'
 
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-HISTSIZE=2000
-HISTFILESIZE=2000
+HISTSIZE=4000
+HISTFILESIZE=4000
 
 # append to the history file, don't overwrite it
 shopt -s histappend
@@ -100,7 +100,7 @@ alias grpe='grep'
 alias er='vim ~/.bashrc'
 alias re='source ~/.bashrc'
 
-alias nyx-wake='wol 00:1F:D0:9A:A2:25'
+alias nyx-wake='wakeonlan 00:1F:D0:9A:A2:25'
 
 alias co='hg commit -m'
 alias hlog='hg log -l 4'
@@ -157,16 +157,26 @@ alias ent='sudo nsenter -n -t'
 alias mountvbox='mkdir /tmp/vbox && sudo mount -t vboxsf tmp /tmp/vbox'
 alias comparedir='rsync --recursive --delete --links --verbose --dry-run'
 alias comparedirchecksum='rsync --recursive --delete --links --checksum --verbose --dry-run'
+alias l='locate'
+alias dlaudio='youtube-dl -f 251'
 
-
-function dl
+function dlaudio
 {
-	docker logs $2 $(docker ps | grep $1 | awk '{print $1}')
+	youtube-dl -f 251 "$1" 
+	output_file="test"
+	ffmpeg -i "$output_file" -c:a copy "${output_file/webm/opus}"
+	rm "$output_file"
 }
 
-function de
+
+function dockerlogs
 {
-	docker exec -ti $(docker ps | grep $1 | awk '{print $1}') bash
+	docker logs $2 $(docker ps | awk '/$1/ {print $1}')
+}
+
+function dockerexec
+{
+	docker exec -ti $(docker ps | awk '/$1/ {print $1}') bash
 }
 
 alias dockerrmi='for image in $(docker images | awk '/mdalstein/ || /root/ {print $3}'); do docker rmi $image; done'
@@ -242,7 +252,7 @@ alias wallpapersave='for size in 1680 1920 2560; do for i in $(find /usr/share/w
 alias chr='mount -t proc proc /srv/proc/ && mount -t sysfs sys /srv/sys && mount -o bind /dev /srv/dev/ && chroot /srv/'
 
 export GOPATH=~/code/go
-export PATH=$PATH:~/code/tools:$GOPATH/bin
+export PATH=$PATH:~/code/tools:$GOPATH/bin:/snap/bin
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
