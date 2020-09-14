@@ -157,10 +157,14 @@ alias dal='ssh dalmat@dalmat.net'
 alias wiki='cd /srv/usr/local/share/Wikipad/ && python2 WikidPad.py &'
 alias ent='sudo nsenter -n -t'
 alias mountvbox='mkdir /tmp/vbox && sudo mount -t vboxsf tmp /tmp/vbox'
+
 alias comparedir='rsync --recursive --delete --links --verbose --dry-run'
 alias comparedirchecksum='rsync --recursive --delete --links --checksum --verbose --dry-run'
 alias l='locate'
 alias dlaudio='youtube-dl -f 251'
+
+alias start_archlinux='docker run -ti -v /dev:/dev -v /proc:/proc -v /sys:/sys -v $HOME:/home/dalmat -v /tmp:/tmp archlinux-dalmat bash'
+alias apt-add-key='apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys'
 
 function dlaudio
 {
@@ -187,8 +191,8 @@ alias dockerrmi='for image in $(docker images | awk '/mdalstein/ || /root/ {prin
 
 function cp_progress()
 {
-	SIZE=`du -sb $1 | awk '{print $1}'`
-	DEST=`basename $1`
+	local SIZE=`du -sb $1 | awk '{print $1}'`
+	local DEST=`basename $1`
 
 	( cd $1 ; tar cf - . ) | pv -s $SIZE | ( mkdir $2/$DEST && cd $2/$DEST ; tar xf - )
 }
@@ -200,9 +204,9 @@ function p()
 
 function ffconcat()
 {
-	length=$(($#-1))
-	output=${@: -1}
-	array=("${@:1:$length}")
+	local length=$(($#-1))
+	local output=${@: -1}
+	local array=("${@:1:$length}")
 	for i in "${array[@]}"; do echo "$i"; done
 	echo -n "" > liste
 	for file in "${array[@]}"; do echo file \'$(realpath "$file")\' >> liste; done
@@ -214,15 +218,15 @@ function ffconcat()
 
 function shiftTimestamp()
 {
-	delta=$1
+	local delta=$1
 	shift
 	exiftool -P -overwrite_original -AllDates+=$delta -DateTimeDigitized+=$delta -DateTime+=$delta "$@"
 }
 
 function updateDescription()
 {
-	title=$1
-	description=$2
+	local title=$1
+	local description=$2
 	exiftool -P *.[jJ][pP][gG] -overwrite_original -if '$Title eq '\'"$title"\' -ImageDescription=$description -Description=$description
 }
 
@@ -238,14 +242,14 @@ function removeTimestamp()
 
 function pent()
 {
- pid=$(pidof $1)
+ local pid=$(pidof $1)
 
  sudo nsenter -n -t $pid
 }
 
 function denter()
 {
-  container=$(docker ps | awk ' {print $1 " " $2 " " $3}' | awk '/etcd/ {print $1}')
+  local container=$(docker ps | awk ' {print $1 " " $2 " " $3}' | awk '/etcd/ {print $1}')
   echo "Entering container $container"
   docker exec -ti $container /bin/bash
 }
@@ -256,6 +260,11 @@ alias chr='mount -t proc proc /srv/proc/ && mount -t sysfs sys /srv/sys && mount
 export GOPATH=~/code/go
 export PATH=$PATH:~/code/tools:$GOPATH/bin:~/.local/bin:/snap/bin
 export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
+
+alias printfirstandlastline="awk 'NR==1; END{print}'"
+alias chr='mount -t proc proc /srv/proc/ && mount -t sysfs sys /srv/sys && mount -o bind /dev /srv/dev/ && chroot /srv/'
+
+
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
