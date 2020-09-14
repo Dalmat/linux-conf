@@ -1,7 +1,9 @@
 [user]
 	name = Matthieu Dalstein
 	email = github@dalmat.net
-	#email = matthieu.dalstein@amadeus.com
+
+[include]
+	path = ~/.gitconfig.email
 
 [push]
 	default = current
