@@ -89,38 +89,34 @@ alias ls='ls --color=auto'
 alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
+alias grpe='grep'
 GREP_OPTIONS='--color'
 LESS='-R'
 
-alias cp='cp -i'
-alias du='du -h'
 alias df='df -h'
-alias ll='ls -alhF'
+alias ll='ls -lh'
+alias ls='ls --color=auto'
+alias cp='cp -i'
+#alias ll='ls -alhF'
 alias rec='ls -lht | head'
-alias grpe='grep'
 
-alias er='vim ~/.bashrc'
+alias er='vi ~/.bashrc'
+alias ert='vi ~/.bashrc_local'
 alias re='source ~/.bashrc'
-
-alias nyx-wake='wakeonlan 00:1F:D0:9A:A2:25'
-
-alias co='hg commit -m'
-alias hlog='hg log -l 4'
 
 alias checkcd='find . -type f -exec md5sum {} \; > /dev/null'
 
-
 alias maj='if [[ -f /usr/bin/apt ]]; then sudo apt update ; sudo apt upgrade; else sudo pacman -Syu; fi'
-alias ai='sudo apt-get install'
 alias listpkg='dpkg-query -Wf '"'"'${Installed-Size}\t${Package}\n\'"'"' | sort -n'
 alias ys='yaourt -S --noconfirm'
+alias pk='pkgfile -s'
+alias apt-add-key='apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys'
 
 alias loc='locate -A -i'
-alias v='vim -R'
+alias l='locate'
 
 alias tv='/usr/bin/vlc http://mafreebox.freebox.fr/freeboxtv/playlist.m3u'
 alias ftpfree='lftp hd1.freebox.fr'
-
 
 alias convert2ogg='for i in *.wav; do /usr/bin/oggenc -q 5 "$i" -o "${i%wav}ogg"; done'
 
@@ -135,8 +131,12 @@ alias taille='find /home -type f -printf "%s\t%p\n" |sort -rn |head -n20 |less'
 alias cdd='/usr/lib/wcd/wcd.exec'
 alias ccd='/usr/lib/wcd/wcd.exec'
 
+alias v='vim -R'
 alias vi='vim'
 alias view='vim -R'
+
+alias co='hg commit -m'
+alias hlog='hg log -l 4'
 alias squash='git rebase -i upstream/master'
 alias ff='git pull --ff-only'
 alias fu='git branch -u origin/master'
@@ -144,16 +144,11 @@ alias fr='git pull --rebase'
 alias gitout='git log origin/master..HEAD'
 alias gitin='git log HEAD..origin/master'
 alias amend='git commit --amend --no-edit'
+
 alias dssh='ssh -l dalmat'
 alias mssh='ssh -l matthieu.dalstein -A'
-alias er='vi ~/.bashrc'
-alias ert='vi ~/.bashrc_local'
-alias re='source ~/.bashrc'
-alias df='df -h'
-alias ll='ls -lh'
-alias ls='ls --color=auto'
-alias pk='pkgfile -s'
-alias dal='ssh dalmat@dalmat.net'
+alias nyx-wake='wakeonlan 00:1F:D0:9A:A2:25'
+
 alias wiki='cd /srv/usr/local/share/Wikipad/ && python2 WikidPad.py &'
 alias ent='sudo nsenter -n -t'
 alias mountvbox='mkdir /tmp/vbox && sudo mount -t vboxsf tmp /tmp/vbox'
@@ -161,17 +156,14 @@ alias mountvbox='mkdir /tmp/vbox && sudo mount -t vboxsf tmp /tmp/vbox'
 alias comparedir='rsync --recursive --delete --links --verbose --dry-run'
 alias comparedirchecksum='rsync --recursive --delete --links --checksum --verbose --dry-run'
 
-alias l='locate'
-alias dlaudio='youtube-dl -f 251'
-
 alias start_archlinux='docker run -ti -v /dev:/dev -v /proc:/proc -v /sys:/sys -v $HOME:/home/dalmat -v /tmp:/tmp archlinux-dalmat bash'
-alias apt-add-key='apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys'
 
 function dlaudio
 {
 	youtube-dl -f 251 "$1"
-	output_file="test"
+	local output_file=$(youtube-dl --get-filename "$1")
 	ffmpeg -i "$output_file" -c:a copy "${output_file/webm/opus}"
+	touch -r "$output_file" "${output_file/webm/opus}"
 	rm "$output_file"
 }
 
