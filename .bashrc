@@ -216,6 +216,12 @@ function ffconcat()
 	rm liste
 }
 
+function convertVideoAudioToOpus()
+{
+	ffmpeg -i "$1" -map 0 -c copy -c:a libopus -b:a 220k -af "channelmap=channel_layout=5.1" "$1_converted.mkv"
+	touch -r "$1" "$1_converted.mkv"
+}
+
 function shiftTimestamp()
 {
 	local delta=$1
