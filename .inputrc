@@ -1,3 +1,11 @@
 # /etc/inputrc - global inputrc for libreadline
 # alt + s to swap characters
 "\es": transpose-chars
+
+# mapping to have [Tab] and [Shift]+[Tab] to cycle through all the possible completions:
+#"\t": menu-complete
+"\e[Z": menu-complete-backward
+
+# mappings to have up and down arrow searching through history:
+"\e[A": history-search-backward
+"\e[B": history-search-forward

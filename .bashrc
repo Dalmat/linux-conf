@@ -26,10 +26,10 @@ shopt -s checkwinsize
 
 # set a fancy prompt (non-color, unless we know we "want" color)
 case "$TERM" in
-    xterm-color) color_prompt=yes;;
-    xterm) color_prompt=yes
-          #PROMPT_COMMAND='printf "\033]0;%s@%s:%s\007" "${USER}" "${HOSTNAME%%.*}" "${PWD/#$HOME/~}"'
-	;;
+    xterm-color|xterm)
+		PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ ';;
+	xterm*|rxvt*)
+    	PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1" ;;
     screen*)
       if [ -e /etc/sysconfig/bash-prompt-screen ]; then
           PROMPT_COMMAND=/etc/sysconfig/bash-prompt-screen
@@ -39,34 +39,9 @@ case "$TERM" in
       ;;
     *)
       [ -e /etc/sysconfig/bash-prompt-default ] && PROMPT_COMMAND=/etc/sysconfig/bash-prompt-default
+	  PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
       ;;
  esac
-
-  [ "$PS1" = "\\s-\\v\\\$ " ] && PS1="[\u@\h \W]\\$ "
-  # You might want to have e.g. tty in prompt (e.g. more virtual machines)
-  # and console windows
-  # If you want to do so, just add e.g.
-  # if [ "$PS1" ]; then
-  #   PS1="[\u@\h:\l \W]\\$ "
-  # fi
-
-
-if [ "$color_prompt" = yes ]; then
-    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
-else
-    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
-fi
-#unset color_promptt
-
-# If this is an xterm set the title to user@host:dir
-case "$TERM" in
-xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-    ;;
-*)
-    ;;
-esac
-#PS1='\u@\h:\w\$ '
 
 if [ -f /usr/share/git/completion/git-prompt.sh ]; then
 	source /usr/share/git/completion/git-prompt.sh
@@ -86,18 +61,17 @@ PROMPT_COMMAND='__git_ps1 "\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\
 # enable color support of ls and also add handy aliases
 eval `dircolors -b`
 alias ls='ls --color=auto'
+alias ll='ls -lhF'
 alias grep='grep --color=auto'
+alias grpe='grep'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
-alias grpe='grep'
 GREP_OPTIONS='--color'
 LESS='-R'
 
 alias df='df -h'
-alias ll='ls -lh'
-alias ls='ls --color=auto'
+alias f='LANG=US free -m'
 alias cp='cp -i'
-#alias ll='ls -alhF'
 alias rec='ls -lht | head'
 
 alias er='vi ~/.bashrc'
@@ -150,13 +124,14 @@ alias mssh='ssh -l matthieu.dalstein -A'
 alias nyx-wake='wakeonlan 00:1F:D0:9A:A2:25'
 
 alias wiki='cd /srv/usr/local/share/Wikipad/ && python2 WikidPad.py &'
+
 alias ent='sudo nsenter -n -t'
 alias mountvbox='mkdir /tmp/vbox && sudo mount -t vboxsf tmp /tmp/vbox'
+alias start_archlinux='docker run -ti -v /dev:/dev -v /proc:/proc -v /sys:/sys -v $HOME:/home/dalmat -v /tmp:/tmp archlinux-dalmat bash'
 
+alias checkcd='find . -type f -exec md5sum {} \; > /dev/null'
 alias comparedir='rsync --recursive --delete --links --verbose --dry-run'
 alias comparedirchecksum='rsync --recursive --delete --links --checksum --verbose --dry-run'
-
-alias start_archlinux='docker run -ti -v /dev:/dev -v /proc:/proc -v /sys:/sys -v $HOME:/home/dalmat -v /tmp:/tmp archlinux-dalmat bash'
 
 function dlaudio
 {
@@ -174,6 +149,17 @@ function freedl
 	ffmpeg -i "rtsp://mafreebox.freebox.fr/fbxtv_pub/stream?namespace=1&service=$1" -c:v copy -c:a copy /srv/$1-$(date +%F_%T).ts
 }
 
+alias printfirstandlastline="awk 'NR==1; END{print}'"
+
+# If there are multiple matches for completion, Tab should cycle through them
+bind 'TAB':menu-complete
+
+# Display a list of the matching files
+bind "set show-all-if-ambiguous on"
+
+# Perform partial completion on the first Tab press,
+# only start cycling full results on the second Tab press
+bind "set menu-complete-display-prefix on"
 
 function dockerlogs
 {
@@ -186,8 +172,6 @@ function dockerexec
 }
 
 alias dockerrmi='for image in $(docker images | awk '/mdalstein/ || /root/ {print $3}'); do docker rmi $image; done'
-
-
 
 function cp_progress()
 {
@@ -255,9 +239,9 @@ function pent()
 
 function denter()
 {
-  local container=$(docker ps | awk ' {print $1 " " $2 " " $3}' | awk '/etcd/ {print $1}')
-  echo "Entering container $container"
-  docker exec -ti $container /bin/bash
+	local container=$(docker ps | awk ' {print $1 " " $2 " " $3}' | awk '/etcd/ {print $1}')
+	echo "Entering container $container"
+	docker exec -ti $container /bin/bash
 }
 
 alias wallpapersave='for size in 1680 1920 2560; do for i in $(find /usr/share/wallpapers -name $size*) ; do arr=(${i//\// }); echo  cp -n "$i" /mnt/ftp/Multi/wallpapers/${arr[1]}-${arr[4]}; done; done'
@@ -267,16 +251,11 @@ export GOPATH=~/code/go
 export PATH=$PATH:~/code/tools:$GOPATH/bin:~/.local/bin:/snap/bin
 export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
 
-alias printfirstandlastline="awk 'NR==1; END{print}'"
-alias chr='mount -t proc proc /srv/proc/ && mount -t sysfs sys /srv/sys && mount -o bind /dev /srv/dev/ && chroot /srv/'
-
-
-
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).
 if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
-    . /etc/bash_completion
+	. /etc/bash_completion
 fi
 
 if [ -f ~/.bashrc_local ];then
