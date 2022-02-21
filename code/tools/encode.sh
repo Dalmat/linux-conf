@@ -3,6 +3,8 @@ set -euo pipefail
 
 # TODO Manage subtitle addition
 # ffmpeg -y -i video.mkv -f srt -i subtitle.srt -map 0:0 -map 0:1 -map 0:2  -map 1:0 -c copy -c:s srt -metadata:s:s:0 title=standard -metadata:s:s:0 language=eng video.mkv
+# Remove stream 2 from input file, and convert stream 1 to opus 5.1
+#fmpeg -i Apocalypse\ Now.mkv -map 0 -map -0:2 -c:v copy -c:s copy -c:2 copy -c:3 copy -c:1 libopus -b:1 220k -metadata:s:1 title="French Opus 5.1"  -filter:1 "channelmap=channel_layout=5.1" ApocalypseNow3.mkv
 
 bitrate=1024
 declare -A defaultcrf
@@ -20,6 +22,7 @@ vcodec="vp9"
 options=""
 ext="_rs"
 passes=("")
+container=""
 
 defaultcrf[x264]=23
 defaultcrf[x265]=23
@@ -32,7 +35,7 @@ cat << EOF
 $0 [options] <file(s) to encode>
 Options:
 	-h  Display the usage
-	-q <video quality> (default ${defaultcrf[x265]})>
+	-q <video quality> (default ${defaultcrf[vp9]})>
 	-c : Rotate the video 90° clockwise
 	-p : Rotate the video 90° anti-clockwise (positive sense)
 	-s <start time> : Start the encoded video at the given time (format for 5 minutes is 300, or 05:00)
@@ -42,13 +45,14 @@ Options:
 	-g <XxY> : Resize the video (e.g 800x600)
 	-a <audio codec> : Specify the audio codec (e.g : opus, vorbis, aac, copy)
 	-A <audio quality> : Specify the audio quality (e.g low/mid/high) (default: mid). Note: the values depend on the codec
-	-v <video codec> : Specify the video codec (e.g : x264, x265, copy, hevc_vaapi, none)
+	-v <video codec> : Specify the video codec (e.g : vp9, x264, x265, copy, hevc_vaapi, none)
 	-x <extension> : Add an extension suffix to the output filename (default : $ext if the output extension is the same as the input file)
+	-f <container> : Specify the container (e.g : webm, mkv, mp4)
 EOF
 exit 0
 }
 
-while getopts "hq:cps:e:d:ig:a:A:v:x:" opt; do
+while getopts "hq:cps:e:d:ig:a:A:v:x:f:" opt; do
 	case "$opt" in
 		q) crf="$OPTARG" ;;
 		c) # --rotate clockwise
@@ -66,6 +70,7 @@ while getopts "hq:cps:e:d:ig:a:A:v:x:" opt; do
 		A) aquality=$OPTARG ;;
 		v) vcodec=$OPTARG ;;
 		x) ext=$OPTARG ;;
+		f) container=$OPTARG ;;
 		h) usage ;;
 	esac
 done
@@ -112,7 +117,7 @@ elif [[ $vcodec == "none" ]]; then
 	video="-vn"
 else
 	[ -z $crf ] && crf=${defaultcrf[$vcodec]}
-	
+
 	if [[ $vcodec == "x264" ]]; then
 		video="-c:v libx264 -crf $crf"
 		preset="-preset slower"
@@ -125,24 +130,21 @@ else
 	elif [[ $vcodec == "vp9" ]]; then
 		preset=""
 		video="-c:v libvpx-vp9 -g 200 -threads 4 -tile-columns 2 -quality good -speed 1 -b:v 0 -crf $crf"
-	#	video="-c:v libvpx-vp9 -threads 4 -tile-columns 6  -b:v 4M -crf $crf"
-		passes=("-pass 1" "-pass 2")
+		passes=("-pass 1 -an -f null" "-pass 2")
 	fi
 fi
 
-
-if [[ $acodec == "aac" ]]; then
-    container=mp4
-elif [[ $acodec != "aac" ]] && [[ $vcodec == "vp9" ]]; then
-    container=webm
-else
-    container=mkv
+if [[ $container == "" ]]; then
+	if [[ $acodec == "aac" ]]; then
+		container=mp4
+	elif [[ $vcodec == "vp9" ]] && ( [[ $acodec == "opus" ]] || [[ $acodec == "vorbis" ]] ) ; then
+		container=webm
+    else
+		container=mkv
+	fi
 fi
 
-if [[ $container == "mkv" ]]; then
-# 	duration=$(mediainfo --Inform="General;%Duration%" "$file")
-	options="$options -reserve_index_space 2000"
-elif [[ $container == "mp4" ]]; then
+if [[ $container == "mp4" ]]; then
 	options="$options -movflags +faststart"
 fi
 
@@ -151,6 +153,17 @@ for file in "$@"; do
 done
 
 for file in "$@"; do
+
+file_dependent_options=""
+if [[ $container == "mkv" ]]; then
+	space_need=""
+	duration=$(mediainfo --Inform="General;%Duration%" "$file") || space_need=2000
+	if [[ $duration == "" ]]; then echo "Could not find duration of $file, using default index space"; fi
+	if [[ $space_need == "" ]]; then
+		space_need=$(echo "${duration} * 0.003" | bc -l) # Value computed from tests (20k for 2hours video)
+	fi
+	file_dependent_options="-reserve_index_space ${space_need%%.*}"
+fi
 
 echo "Encoding $file"
 
@@ -176,8 +189,10 @@ fi
 
 STARTTIME=$(date +%s)
 for pass in "${passes[@]}"; do
+output_file="${newfile}"
+if [[ "$pass" == *"pass 1"* ]]; then output_file="/dev/null"; fi
 set -x
-ffmpeg -y $hwaccel -i "$file" $geometry $startt $stopt $deinterlace $rotate $audio $video $preset $options $pass "${newfile}" < /dev/null
+ffmpeg -y $hwaccel -i "$file" -map 0 $geometry $startt $stopt $deinterlace $rotate $audio $video $preset $options $file_dependent_options $pass "${output_file}" < /dev/null
 set +x
 done
 touch -r "$file" "${newfile}"
