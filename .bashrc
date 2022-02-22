@@ -91,6 +91,7 @@ alias l='locate'
 
 alias tv='/usr/bin/vlc http://mafreebox.freebox.fr/freeboxtv/playlist.m3u'
 alias ftpfree='lftp hd1.freebox.fr'
+alias ebook='lftp ftp://inkrusted:2221 -e "cd Books"'
 
 alias convert2ogg='for i in *.wav; do /usr/bin/oggenc -q 5 "$i" -o "${i%wav}ogg"; done'
 
