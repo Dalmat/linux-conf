@@ -161,6 +161,7 @@ if [[ $container == "mkv" ]]; then
 	if [[ $duration == "" ]]; then echo "Could not find duration of $file, using default index space"; fi
 	if [[ $space_need == "" ]]; then
 		space_need=$(echo "${duration} * 0.003" | bc -l) # Value computed from tests (20k for 2hours video)
+		space_need=$(echo "${duration} * 0.01" | bc -l) # Value computed from tests (20k for 2hours video)
 	fi
 	file_dependent_options="-reserve_index_space ${space_need%%.*}"
 fi
@@ -177,7 +178,7 @@ if [ "$container" != "${file##*.}" ]; then
 	ext=""
 fi
 
-if [ -z $directory ]; then
+if [ -z "$directory" ]; then
 	newfile=${file%.*}$ext.$container
 else
     newfile=$(basename "$file")
