@@ -207,6 +207,12 @@ function convertVideoAudioToOpus()
 	touch -r "$1" "$1_converted.mkv"
 }
 
+function extractopus
+{
+       for i in "$@"; do ffmpeg -i "$i" -c:a copy "${i/webm/opus}"; touch -r "$i" "${i/webm/opus}"; done
+}
+
+
 function shiftTimestamp()
 {
 	local delta=$1
@@ -243,6 +249,11 @@ function denter()
 	local container=$(docker ps | awk ' {print $1 " " $2 " " $3}' | awk '/etcd/ {print $1}')
 	echo "Entering container $container"
 	docker exec -ti $container /bin/bash
+}
+
+function findCaseInsensitiveDuplicates()
+{
+	find $1 | sort | uniq -di
 }
 
 alias wallpapersave='for size in 1680 1920 2560; do for i in $(find /usr/share/wallpapers -name $size*) ; do arr=(${i//\// }); echo  cp -n "$i" /mnt/ftp/Multi/wallpapers/${arr[1]}-${arr[4]}; done; done'
