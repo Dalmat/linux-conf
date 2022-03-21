@@ -137,7 +137,7 @@ alias comparedirchecksum='rsync --recursive --delete --links --checksum --verbos
 function dlaudio
 {
 	youtube-dl -f 251 "$1"
-	local output_file=$(youtube-dl --get-filename "$1")
+	local output_file=$(youtube-dl -f 251 --get-filename "$1")
 	ffmpeg -i "$output_file" -c:a copy "${output_file/webm/opus}"
 	touch -r "$output_file" "${output_file/webm/opus}"
 	rm "$output_file"
