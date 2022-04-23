@@ -133,6 +133,7 @@ alias start_archlinux='docker run -ti -v /dev:/dev -v /proc:/proc -v /sys:/sys -
 alias checkcd='find . -type f -exec md5sum {} \; > /dev/null'
 alias comparedir='rsync --recursive --delete --links --verbose --dry-run'
 alias comparedirchecksum='rsync --recursive --delete --links --checksum --verbose --dry-run'
+alias dl='youtube-dl -f best'
 
 function dlaudio
 {
