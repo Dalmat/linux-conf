@@ -94,6 +94,7 @@ alias ftpfree='lftp hd1.freebox.fr'
 alias ebook='lftp ftp://inkrusted:2221 -e "cd Books"'
 
 alias convert2ogg='for i in *.wav; do /usr/bin/oggenc -q 5 "$i" -o "${i%wav}ogg"; done'
+alias convert2opus='for i in *.mp3; do ffmpeg -y -i "${i}" -b:a 128k "${i/mp3/opus}"; touch -r "$i" "${i/mp3/opus}"; done'
 
 alias camelCase="rename 's/\b(\w)/\u$1/g' *"
 alias lowercase="rename 'y/A-Z/a-z/'"
