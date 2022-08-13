@@ -80,7 +80,7 @@ alias re='source ~/.bashrc'
 
 alias checkcd='find . -type f -exec md5sum {} \; > /dev/null'
 
-alias maj='if [[ -f /usr/bin/apt ]]; then sudo apt update ; sudo apt upgrade; else sudo pacman -Syu; fi'
+alias maj='if [[ -f /usr/bin/apt ]]; then sudo apt update ; sudo apt upgrade; sudo apt autoremove; else sudo pacman -Syu; fi'
 alias listpkg='dpkg-query -Wf '"'"'${Installed-Size}\t${Package}\n\'"'"' | sort -n'
 alias ys='yaourt -S --noconfirm'
 alias pk='pkgfile -s'
