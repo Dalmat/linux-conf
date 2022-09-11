@@ -80,7 +80,7 @@ alias re='source ~/.bashrc'
 
 alias checkcd='find . -type f -exec md5sum {} \; > /dev/null'
 
-alias maj='if [[ -f /usr/bin/apt ]]; then sudo apt update ; sudo apt upgrade; sudo apt autoremove; else sudo pacman -Syu; fi'
+alias maj='if [[ -f /usr/bin/apt ]]; then sudo apt update ; sudo apt dist-upgrade; sudo apt autoremove; else sudo pacman -Syu; fi'
 alias listpkg='dpkg-query -Wf '"'"'${Installed-Size}\t${Package}\n\'"'"' | sort -n'
 alias ys='yaourt -S --noconfirm'
 alias pk='pkgfile -s'
@@ -95,6 +95,7 @@ alias ebook='lftp ftp://inkrusted:2221 -e "cd Books"'
 
 alias convert2ogg='for i in *.wav; do /usr/bin/oggenc -q 5 "$i" -o "${i%wav}ogg"; done'
 alias convert2opus='for i in *.mp3; do ffmpeg -y -i "${i}" -b:a 128k "${i/mp3/opus}"; touch -r "$i" "${i/mp3/opus}"; done'
+alias flac2opus='for i in *.flac; do opusenc --bitrate 120k "$i" "${i/flac/opus}"; done'
 
 alias camelCase="rename 's/\b(\w)/\u$1/g' *"
 alias lowercase="rename 'y/A-Z/a-z/'"
