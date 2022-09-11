@@ -23,6 +23,7 @@ options=""
 ext="_rs"
 passes=("")
 container=""
+map=0
 
 defaultcrf[x264]=23
 defaultcrf[x265]=23
@@ -48,11 +49,12 @@ Options:
 	-v <video codec> : Specify the video codec (e.g : vp9, x264, x265, copy, hevc_vaapi, none)
 	-x <extension> : Add an extension suffix to the output filename (default : $ext if the output extension is the same as the input file)
 	-f <container> : Specify the container (e.g : webm, mkv, mp4)
+	-m <ffmpeg map id> : Specify the streams to map on output (default: 0 to map all streams)
 EOF
 exit 0
 }
 
-while getopts "hq:cps:e:d:ig:a:A:v:x:f:" opt; do
+while getopts "hq:cps:e:d:ig:a:A:v:x:f:m:" opt; do
 	case "$opt" in
 		q) crf="$OPTARG" ;;
 		c) # --rotate clockwise
@@ -71,6 +73,7 @@ while getopts "hq:cps:e:d:ig:a:A:v:x:f:" opt; do
 		v) vcodec=$OPTARG ;;
 		x) ext=$OPTARG ;;
 		f) container=$OPTARG ;;
+		m) map=$OPTARG ;;
 		h) usage ;;
 	esac
 done
@@ -193,7 +196,7 @@ for pass in "${passes[@]}"; do
 output_file="${newfile}"
 if [[ "$pass" == *"pass 1"* ]]; then output_file="/dev/null"; fi
 set -x
-ffmpeg -y $hwaccel -i "$file" -map 0 $geometry $startt $stopt $deinterlace $rotate $audio $video $preset $options $file_dependent_options $pass "${output_file}" < /dev/null
+ffmpeg -y $hwaccel -i "$file" -map $map $geometry $startt $stopt $deinterlace $rotate $audio $video $preset $options $file_dependent_options $pass "${output_file}" < /dev/null
 set +x
 done
 touch -r "$file" "${newfile}"
