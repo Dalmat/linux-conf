@@ -135,18 +135,21 @@ alias start_archlinux='docker run -ti -v /dev:/dev -v /proc:/proc -v /sys:/sys -
 alias checkcd='find . -type f -exec md5sum {} \; > /dev/null'
 alias comparedir='rsync --recursive --delete --links --verbose --dry-run'
 alias comparedirchecksum='rsync --recursive --delete --links --checksum --verbose --dry-run'
+
 alias dl='youtube-dl -f best'
+
 
 function dlaudio
 {
-	youtube-dl -f 251 "$1"
-	local output_file=$(youtube-dl -f 251 --get-filename "$1")
+	yt-dlp -f 251 "$1"
+	local output_file=$(yt-dlp -f 251 --get-filename "$1")
 	ffmpeg -i "$output_file" -c:a copy "${output_file/webm/opus}"
 	touch -r "$output_file" "${output_file/webm/opus}"
 	rm "$output_file"
 }
 
 alias dvgrab-auto='dvgrab --autosplit --timestamp --format raw capture'
+alias hdmi-record='ffmpeg -f pulse -i alsa_input.usb-MACROSILICON_USB_Video-02.analog-stereo -f video4linux2 -framerate 50 -input_format mjpeg -i /dev/video1 -c copy'
 
 function freedl
 {
@@ -259,7 +262,7 @@ function findCaseInsensitiveDuplicates()
 	find $1 | sort | uniq -di
 }
 
-alias wallpapersave='for size in 1680 1920 2560; do for i in $(find /usr/share/wallpapers -name $size*) ; do arr=(${i//\// }); echo  cp -n "$i" /mnt/ftp/Multi/wallpapers/${arr[1]}-${arr[4]}; done; done'
+alias wallpapersave='for size in 1600 1680 1920 2560; do for i in $(find /usr/share/wallpapers -name $size*) ; do arr=(${i//\// }); echo  cp -n "$i" /mnt/ftp/Multi/wallpapers/${arr[1]}-${arr[4]}; done; done'
 alias chr='mount -t proc proc /srv/proc/ && mount -t sysfs sys /srv/sys && mount -o bind /dev /srv/dev/ && chroot /srv/'
 
 export GOPATH=~/code/go
