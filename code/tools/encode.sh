@@ -23,7 +23,7 @@ options=""
 ext="_rs"
 passes=("")
 container=""
-map=0
+map="0:a -map 0:v -map 0:s?"
 
 defaultcrf[x264]=23
 defaultcrf[x265]=23
@@ -101,6 +101,8 @@ elif [[ $acodec == "opus" ]]; then
             aquality=128k
         fi
 	audio="-c:a libopus -b:a $aquality -af aformat=channel_layouts='stereo'"
+	# 5.1 setting
+	#audio="-c:a libopus -b:a 160k -ac 6"
 elif [[ $acodec == "vorbis" ]]; then
         if [[ $aquality == "low" ]]; then
             aquality=3
@@ -196,10 +198,13 @@ for pass in "${passes[@]}"; do
 output_file="${newfile}"
 if [[ "$pass" == *"pass 1"* ]]; then output_file="/dev/null"; fi
 set -x
-ffmpeg -y $hwaccel -i "$file" -map $map $geometry $startt $stopt $deinterlace $rotate $audio $video $preset $options $file_dependent_options $pass "${output_file}" < /dev/null
+ffmpeg -y $hwaccel -i "$file" -c:s copy -map $map $geometry $startt $stopt $deinterlace $rotate $audio $video $preset $options $file_dependent_options $pass "${output_file}" < /dev/null
 set +x
 done
 touch -r "$file" "${newfile}"
+if [[ "$pass" == *"pass 2"* ]]; then
+	rm $(dirname "$file")/ffmpeg2pass-0.log
+fi
 ELAPSEDTIMED=$(($(date +%s) - STARTTIME))
 
 echo -e "${newfile} encoded in \033[01;32m$ELAPSEDTIMED s\033[00m"
