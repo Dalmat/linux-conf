@@ -225,6 +225,7 @@ function shiftTimestamp()
 	shift
 	exiftool -P -overwrite_original -AllDates+=$delta -DateTimeDigitized+=$delta -DateTime+=$delta "$@"
 }
+alias reduceTimestampBy1Hour='exiftool -P -overwrite_original -AllDates-=1 -DateTimeDigitized-=1 -DateTime-=1'
 
 function updateDescription()
 {
