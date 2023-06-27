@@ -79,6 +79,9 @@ while getopts "hq:cps:e:d:ig:a:A:v:x:f:m:" opt; do
 done
 
 
+# Check mediainfo pre-requisite
+type mediainfo > /dev/null
+
 shift $(($OPTIND - 1))
 
 if [[ $acodec == "aac" ]]; then
@@ -100,9 +103,8 @@ elif [[ $acodec == "opus" ]]; then
         elif [[ $aquality == "high" ]]; then
             aquality=128k
         fi
-	audio="-c:a libopus -b:a $aquality -af aformat=channel_layouts='stereo'"
-	# 5.1 setting
-	#audio="-c:a libopus -b:a 160k -ac 6"
+    # For opus, we need to specify the number of channels to use, which depends on the file
+    # audio string will be built later on
 elif [[ $acodec == "vorbis" ]]; then
         if [[ $aquality == "low" ]]; then
             aquality=3
@@ -151,6 +153,8 @@ fi
 
 if [[ $container == "mp4" ]]; then
 	options="$options -movflags +faststart"
+elif [[ $container == "mkv" ]]; then
+    options="$options -cues_to_front yes"
 fi
 
 for file in "$@"; do
@@ -159,16 +163,16 @@ done
 
 for file in "$@"; do
 
-file_dependent_options=""
-if [[ $container == "mkv" ]]; then
-	space_need=""
-	duration=$(mediainfo --Inform="General;%Duration%" "$file") || space_need=2000
-	if [[ $duration == "" ]]; then echo "Could not find duration of $file, using default index space"; fi
-	if [[ $space_need == "" ]]; then
-		space_need=$(echo "${duration} * 0.003" | bc -l) # Value computed from tests (20k for 2hours video)
-		space_need=$(echo "${duration} * 0.01" | bc -l) # Value computed from tests (20k for 2hours video)
+# Opus settings
+if [[ $acodec == "opus" ]]; then    
+    #Identify how many channels are present in the audio stream
+    channels=$(mediainfo --Inform="Audio;%Channel(s)%" "$file")
+    if [[ $channels =~ 6+ ]]; then
+        # 5.1 setting
+        audio="-c:a libopus -b:a 192k -ac 6"
+    else
+        audio="-c:a libopus -b:a $aquality -af aformat=channel_layouts='stereo'"
 	fi
-	file_dependent_options="-reserve_index_space ${space_need%%.*}"
 fi
 
 echo "Encoding $file"
@@ -198,7 +202,7 @@ for pass in "${passes[@]}"; do
 output_file="${newfile}"
 if [[ "$pass" == *"pass 1"* ]]; then output_file="/dev/null"; fi
 set -x
-ffmpeg -y $hwaccel -i "$file" -c:s copy -map $map $geometry $startt $stopt $deinterlace $rotate $audio $video $preset $options $file_dependent_options $pass "${output_file}" < /dev/null
+ffmpeg -y $hwaccel -i "$file" -c:s copy -map $map $geometry $startt $stopt $deinterlace $rotate $audio $video $preset $options $pass "${output_file}" < /dev/null
 set +x
 done
 touch -r "$file" "${newfile}"
