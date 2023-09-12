@@ -58,6 +58,7 @@ while getopts "hq:cps:e:d:ig:a:A:v:x:f:m:" opt; do
 	case "$opt" in
 		q) crf="$OPTARG" ;;
 		c) # --rotate clockwise
+		   # TODO: use when applicable metadata rotation: ffmpeg -i $INPUTVIDEO -metadata:s:v rotate="90" -codec copy $OUTPUTVIDEO
 		   rotate=-vf\ transpose=1
 	   	   ;;
 		p) # rotate anti clockwise
