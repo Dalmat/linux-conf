@@ -23,7 +23,8 @@ options=""
 ext="_rs"
 passes=("")
 container=""
-map="0:a -map 0:v -map 0:s?"
+#map="0:a -map 0:v -map 0:s?"
+map="0"
 
 defaultcrf[x264]=23
 defaultcrf[x265]=23
@@ -36,7 +37,6 @@ cat << EOF
 $0 [options] <file(s) to encode>
 Options:
 	-h  Display the usage
-	-q <video quality> (default ${defaultcrf[vp9]})>
 	-c : Rotate the video 90° clockwise
 	-p : Rotate the video 90° anti-clockwise (positive sense)
 	-s <start time> : Start the encoded video at the given time (format for 5 minutes is 300, or 05:00)
@@ -47,6 +47,7 @@ Options:
 	-a <audio codec> : Specify the audio codec (e.g : opus, vorbis, aac, copy)
 	-A <audio quality> : Specify the audio quality (e.g low/mid/high) (default: mid). Note: the values depend on the codec
 	-v <video codec> : Specify the video codec (e.g : vp9, x264, x265, copy, hevc_vaapi, none)
+	-q <video quality> (default ${defaultcrf[vp9]})>
 	-x <extension> : Add an extension suffix to the output filename (default : $ext if the output extension is the same as the input file)
 	-f <container> : Specify the container (e.g : webm, mkv, mp4)
 	-m <ffmpeg map id> : Specify the streams to map on output (default: 0 to map all streams)
