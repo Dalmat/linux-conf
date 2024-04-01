@@ -143,10 +143,16 @@ function dlaudio
 {
 	yt-dlp -f 251 "$1"
 	local output_file=$(yt-dlp -f 251 --get-filename "$1")
-	ffmpeg -i "$output_file" -c:a copy "${output_file/webm/opus}"
+	ffmpeg -i "$output_file" -c:a copy -to 02:00:00 "${output_file/webm/opus}"
 	touch -r "$output_file" "${output_file/webm/opus}"
 	rm "$output_file"
 }
+
+function expandPlaylist
+{
+	IFS=$'\n'
+	 for i in $(cat playlists/DanceFloor\ 2023.m3u); do cp -a $i /srv/DanceFloor; done
+ }
 
 alias dvgrab-auto='dvgrab --autosplit --timestamp --format raw capture'
 alias hdmi-record='ffmpeg -f pulse -i alsa_input.usb-MACROSILICON_USB_Video-02.analog-stereo -f video4linux2 -framerate 50 -input_format mjpeg -i /dev/video1 -c copy'
